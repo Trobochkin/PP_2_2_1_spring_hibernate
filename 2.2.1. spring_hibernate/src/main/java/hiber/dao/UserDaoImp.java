@@ -1,9 +1,11 @@
 package hiber.dao;
 
+import hiber.model.Car;
 import hiber.model.User;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
 import java.util.List;
@@ -22,8 +24,24 @@ public class UserDaoImp implements UserDao {
    @Override
    @SuppressWarnings("unchecked")
    public List<User> listUsers() {
-      TypedQuery<User> query=sessionFactory.getCurrentSession().createQuery("from User");
+      TypedQuery<User> query = sessionFactory.getCurrentSession().createQuery("from User");
       return query.getResultList();
    }
 
+   @Override
+   @Transactional
+   public User getUserByCar(String model, int series) {
+      return sessionFactory.getCurrentSession()
+              .createQuery("FROM Car where model = :model and series = :series", Car.class)
+              .setParameter("model", model)
+              .setParameter("series", series)
+              .getSingleResult()
+              .getUser();
+   }
+
+   @Override
+   @Transactional
+   public void CleanUsers() {
+      sessionFactory.getCurrentSession().createQuery("DELETE FROM User").executeUpdate();
+   }
 }
